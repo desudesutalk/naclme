@@ -1,0 +1,222 @@
+<html>
+
+<head>
+	<title>Simple crypt</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<script language="JavaScript" type="text/javascript" src="base58.js"></script>
+	<script language="JavaScript" type="text/javascript" src="nacl-fast.js"></script>
+	<script language="JavaScript" type="text/javascript" src="utf8array.js"></script>
+	<style type="text/css">
+	body {
+		font-family: sans-serif;
+		color: #333;
+		background: #fefefe;
+		margin: 0;
+		font-size: 1.2em;
+		line-height: 1.4;
+		text-align: left;
+	}
+
+	a {
+		color: #55acee;
+	}
+
+	.header {
+		text-align: center;
+	}
+
+	h1 span {
+		color: #888;
+		font-size: 0.7em;
+		font-weight: normal;
+	}
+
+	.container {
+		max-width: 800px;
+		margin: 0 auto;
+		padding-right: 15px;
+		padding-left: 15px;
+	}
+
+	input,
+	textarea {
+		width: 100%;
+		resize: vertical;
+		border-radius: 3px;
+		font-size: inherit;
+		border: 1px solid #ccc;
+		font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+		padding: 5px;
+		margin-bottom: 5px;
+	}
+
+	nav {
+		overflow: auto;
+		padding: 0;
+		margin: 0;
+		background-color: #333838;
+		color: #ddd;
+		text-transform: uppercase;
+		font-size: .9em;
+		margin-bottom: 1em;
+	}
+
+	nav ul {
+		list-style: none;
+		display: inline-block;
+		margin: 0;
+		padding: 0;
+	}
+
+	nav ul li {
+		position: relative;
+		display: inline-block;
+		padding: 0;
+		text-transform: uppercase;
+	}
+
+	nav ul li a {
+		display: inline-block;
+		padding: 15px 20px;
+		color: #ddd;
+		text-decoration: none;
+		border-bottom: 4px solid transparent;
+	}
+
+	nav ul li a.active {
+		border-bottom: 4px solid #1ac9db;
+	}
+
+	nav ul li a:hover {
+		background-color: #1b1d1d;
+	}
+
+	a {
+		transition: .2s ease-in all;
+		text-decoration: none;
+	}
+
+	a:hover {
+		text-decoration: underline;
+	}
+
+	.hidden {
+		display: none;
+	}
+
+	.center {
+		text-align: center;
+	}
+
+	button {
+		-moz-box-shadow: inset 0px 1px 0px 0px #54a3f7;
+		-webkit-box-shadow: inset 0px 1px 0px 0px #54a3f7;
+		box-shadow: inset 0px 1px 0px 0px #54a3f7;
+		background-color: #007dc1;
+		-moz-border-radius: 3px;
+		-webkit-border-radius: 3px;
+		border-radius: 3px;
+		border: 1px solid #124d77;
+		display: inline-block;
+		cursor: pointer;
+		color: #ffffff;
+		padding: 6px 24px;
+		text-decoration: none;
+		text-shadow: 0px 1px 0px #154682;
+		outline: none;
+	}
+
+	button:hover {
+		background-color: #0061a7;
+	}
+
+	button:active {
+		position: relative;
+		top: 1px;
+	}
+
+	hr {
+		border: none;
+		height: 1px;
+		color: #eee;
+		background-color: #eee;
+		line-height: 1em;
+	}
+
+	pre {
+		display: block;
+		padding: 9.5px;
+		margin: 0 0 10px;
+		font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+		line-height: 1.42857143;
+		color: #333;
+		word-break: break-all;
+		word-wrap: break-word;
+		white-space: pre-wrap;
+		background-color: #f5f5f5;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+	}
+
+	code {
+		padding: 2px 4px;
+		font-size: 90%;
+		color: #c7254e;
+		background-color: #f9f2f4;
+		border-radius: 4px;
+		font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+	}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<h1 class="header">NaCl me! <span>Throwaway public key cryptography.</span></h1>
+	</div>
+	<nav>
+		<div class="container">
+			<ul>
+				<li><a href="javascritp:;" class="active" id="nav-recieve">Receive</a></li>
+				<li><a href="javascritp:;" id="nav-send">Send</a></li>
+				<li><a href="javascritp:;" id="nav-about">About</a></li>
+			</ul>
+		</div>
+	</nav>
+	<div class="container" id="cont-recieve">
+		<p>
+			<a href="#" id="replylink"></a> - send this link to your friend and then he can easily start to encrypt for you!</p>
+		<p><strong>Note:</strong> if you close or refresh this page, new key will be generated. So keep this page open until you receive and decrypt your correspondence!</p>
+		<div id="decode-form">
+			<textarea id="fordecode" rows=9 cols=85 placeholder="Paste crypted text here"></textarea>
+			<button id="decode">Decrypt</button>
+		</div>
+		<p class="center hidden" id="decode-another"><a href="javascritp:;">decrypt another message</a></p>
+		<hr>
+		<div id="decoded-messages">
+			<br>
+		</div>
+	</div>
+	<div class="container hidden" id="cont-send">
+		<div id="encode-form">
+			<p>You are going to encrypt message for following key:</p>
+			<input type="text" id="tokey" size=60>
+			<p>Write your message here and then press &laquo;Encrypt&raquo; button:</p>
+			<textarea id="forencode" rows=9 cols=85></textarea>
+			<button id="encode">Encrypt</button>
+		</div>
+		<p class="center hidden" id="encode-another"><a href="javascritp:;">encrypt another message</a></p>
+		<hr>
+		<div id="encoded-messages">
+			<br>
+		</div>
+	</div>
+	<div class="container hidden" id="cont-about">
+		<p>This is a very simple application what uses<a href="https://github.com/dchest/tweetnacl-js" target="_blank">TweetNaCl-js</a> library for doing public key cryptography in your browser. This app is best for exchanging short messages. Especially in case when you want to recieve something in private and don't want to exchange skype addresses or emails, reveal your facebook pange and so on.</p>
+		<p>Each time you open this page new random key is generated for you. Nothing is stored in your browsers cookies or <code>localStorage</code>. There is also no server-side code and nothing is sent anywhere from your browser.</p>
+		<p>You can also check code of this app <a href="https://github.com/desudesutalk/naclme" target="_blank">on gihub</a></p>
+	</div>
+	<script language="JavaScript" type="text/javascript" src="main.js"></script>
+</body>
+
+</html>
