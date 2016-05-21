@@ -142,4 +142,5 @@ document.getElementById('tokey').onchange = function(e) {
 	var m = e.target.value.match(/#([a-z0-9]+)$/i)
 	console.log(e.target.value, m);
 	if (m) e.target.value = m[1];
+	e.target.value = e.target.value.replace(/[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+/g, '');
 }
