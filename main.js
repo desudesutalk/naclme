@@ -57,7 +57,7 @@ window.onload = function() {
 			parent = document.getElementById('encoded-messages');
 		txt.textContent = '----------------------------------------------------------------\n' +
 			bs58.enc(cont).match(/.{1,64}/g).join('\n') +
-			'\n--------------------------------------------------------------';
+			'\n----------------------------------------------------------------';
 
 		parent.insertBefore(txt, parent.firstChild);
 		document.getElementById('encode-another').classList.remove('hidden');
