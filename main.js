@@ -7,16 +7,8 @@ function appendBuffer(buffer1, buffer2) {
 	return tmp;
 }
 
-var myKey = nacl.box.keyPair(),
-	myKeyStr = bs58.enc(myKey.publicKey),
-	rl = document.getElementById('replylink'),
-	encFor;
 
-rl.href = location.href;
-rl.hash = '#' + myKeyStr;
-rl.textContent = myKeyStr;
-
-encFor = new Uint8Array(bs58.dec(location.hash.replace(/[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+/g, '')));
+var encFor = new Uint8Array(bs58.dec(location.hash.replace(/[^123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+/g, '')));
 
 if (encFor.length == nacl.box.publicKeyLength) {
 	document.getElementById('tokey').value = bs58.enc(encFor);
@@ -30,6 +22,15 @@ if (encFor.length == nacl.box.publicKeyLength) {
 }
 
 window.onload = function() {
+
+	var myKey = nacl.box.keyPair(),
+		myKeyStr = bs58.enc(myKey.publicKey),
+		rl = document.getElementById('replylink');
+
+	rl.href = location.href;
+	rl.hash = '#' + myKeyStr;
+	rl.textContent = myKeyStr;
+
 	document.getElementById('encode').onclick = function() {
 		var eKey = nacl.box.keyPair(),
 			addr = new Uint8Array(bs58.dec(document.getElementById('tokey').value)),
